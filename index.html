@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>EV True Cost UK — Salary sacrifice + charging</title>
-  <meta name="description" content="Estimate the real monthly cost of a UK EV salary sacrifice car, including Benefit-in-Kind and home charging versus petrol." />
+  <title>EV True Cost UK — Salary sacrifice vs petrol</title>
+  <meta name="description" content="Fair UK comparison of EV salary sacrifice all-in monthly cost versus a comparable petrol car, with editable fuel and tariff rates." />
   <style>
     :root {
       --bg: #0f1419;
@@ -43,14 +43,14 @@
       margin-bottom: 12px;
     }
     h1 { font-size: clamp(1.6rem, 3vw, 2.2rem); margin: 0 0 8px; letter-spacing: -0.02em; }
-    .lede { color: var(--muted); max-width: 62ch; margin: 0; }
+    .lede { color: var(--muted); max-width: 68ch; margin: 0; }
     .grid {
       display: grid;
-      grid-template-columns: 1.1fr 0.9fr;
+      grid-template-columns: 1.15fr 0.85fr;
       gap: 18px;
       align-items: start;
     }
-    @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
     .card {
       background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent 40%), var(--panel);
       border: 1px solid var(--line);
@@ -69,7 +69,7 @@
     .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     @media (max-width: 560px) { .fields { grid-template-columns: 1fr; } }
     label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--muted); }
-    label span.tip { font-size: 11px; opacity: 0.85; }
+    label span.tip { font-size: 11px; opacity: 0.9; }
     input, select {
       background: var(--panel-2);
       border: 1px solid var(--line);
@@ -80,17 +80,35 @@
       outline: none;
     }
     input:focus, select:focus { border-color: var(--accent-dim); box-shadow: 0 0 0 3px rgba(61,214,140,0.15); }
+    input.volatile {
+      border-color: rgba(240, 180, 41, 0.55);
+      box-shadow: inset 0 0 0 1px rgba(240, 180, 41, 0.12);
+    }
     .check {
       display: flex; align-items: center; gap: 8px;
       color: var(--text); font-size: 14px; margin-top: 8px;
     }
     .check input { width: 16px; height: 16px; }
+    .callout {
+      margin: 0 0 14px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(240, 180, 41, 0.1);
+      border: 1px solid rgba(240, 180, 41, 0.35);
+      color: var(--text);
+      font-size: 13px;
+    }
+    .callout strong { color: var(--warn); }
     .results { position: sticky; top: 16px; display: flex; flex-direction: column; gap: 12px; }
     .hero {
       background: linear-gradient(145deg, #1f3d31, #1a222c 55%);
       border: 1px solid rgba(61,214,140,0.35);
       border-radius: var(--radius);
       padding: 18px;
+    }
+    .hero.bad {
+      background: linear-gradient(145deg, #3d1f1f, #1a222c 55%);
+      border-color: rgba(255,107,107,0.35);
     }
     .hero .label { color: var(--muted); font-size: 13px; margin-bottom: 4px; }
     .hero .big {
@@ -99,7 +117,21 @@
       letter-spacing: -0.03em;
       color: var(--accent);
     }
+    .hero.bad .big { color: var(--danger); }
     .hero .sub { color: var(--muted); font-size: 13px; margin-top: 6px; }
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .compare .box {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .compare .k { color: var(--muted); font-size: 12px; }
+    .compare .v { font-size: 1.25rem; font-weight: 700; margin-top: 2px; }
     .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .metric {
       background: var(--panel);
@@ -108,9 +140,7 @@
       padding: 12px;
     }
     .metric .k { color: var(--muted); font-size: 12px; }
-    .metric .v { font-size: 1.15rem; font-weight: 700; margin-top: 2px; }
-    .metric.good .v { color: var(--accent); }
-    .metric.bad .v { color: var(--danger); }
+    .metric .v { font-size: 1.05rem; font-weight: 700; margin-top: 2px; }
     .explainer {
       font-size: 13px; color: var(--muted);
       background: var(--panel);
@@ -123,7 +153,7 @@
       margin-top: 22px;
       color: var(--muted);
       font-size: 12px;
-      max-width: 90ch;
+      max-width: 95ch;
     }
     footer a { color: var(--accent); }
   </style>
@@ -131,15 +161,15 @@
 <body>
   <div class="wrap">
     <header>
-      <div class="badge">Rates updated for 2026/27 · BiK 4% pure EV</div>
+      <div class="badge">Rates updated mid-Sep 2026 · BiK 4% pure EV</div>
       <h1>EV True Cost UK</h1>
-      <p class="lede">See the real monthly cost of an electric car through salary sacrifice — after tax &amp; NI savings, Benefit-in-Kind, and charging — versus sticking with petrol.</p>
+      <p class="lede">Fair all-in monthly cost: EV salary sacrifice versus a comparable petrol car. Yellow fields are yours to edit — petrol and power prices move every week.</p>
     </header>
 
     <div class="grid">
       <form class="card" id="form" autocomplete="off">
         <div class="section">
-          <h2>Salary &amp; sacrifice</h2>
+          <h2>EV salary sacrifice</h2>
           <div class="fields">
             <label>Gross annual salary (£)
               <input type="number" id="salary" min="0" step="100" value="45000" />
@@ -157,9 +187,6 @@
             <label>EV P11D list price (£)
               <input type="number" id="p11d" min="0" step="100" value="40000" />
             </label>
-            <label>Personal lease compare (£/mo, optional)
-              <input type="number" id="personalLease" min="0" step="10" value="520" />
-            </label>
             <label class="check" style="flex-direction:row; align-items:center; margin-top:28px;">
               <input type="checkbox" id="studentLoan" />
               Include Plan 2 student loan
@@ -168,54 +195,94 @@
         </div>
 
         <div class="section">
+          <div class="callout"><strong>Edit these:</strong> fuel, electricity and public charging change often. Use your pump price and your tariff.</div>
           <h2>Driving &amp; charging</h2>
           <div class="fields">
             <label>Annual mileage
               <input type="number" id="miles" min="0" step="100" value="8000" />
             </label>
             <label>EV efficiency (miles per kWh)
-              <input type="number" id="mpkwh" min="0.1" step="0.1" value="3.5" />
+              <input type="number" id="mpkwh" min="0.1" step="0.1" value="4.0" class="volatile" />
+              <span class="tip">Edit me — default 4.0 is a typical real-world figure</span>
             </label>
             <label>% charged at home
               <input type="number" id="homePct" min="0" max="100" step="1" value="80" />
             </label>
             <label>Home electricity (p/kWh)
-              <input type="number" id="homeRate" min="0" step="0.01" value="26.32" />
-              <span class="tip">Default: Ofgem cap avg Oct–Dec 2026 DD</span>
+              <input type="number" id="homeRate" min="0" step="0.01" value="26.32" class="volatile" />
+              <span class="tip">Edit me — Ofgem cap fallback. Overnight EV tariffs are often much lower</span>
             </label>
             <label>Public charging (p/kWh)
-              <input type="number" id="publicRate" min="0" step="0.1" value="55" />
+              <input type="number" id="publicRate" min="0" step="0.1" value="55" class="volatile" />
+              <span class="tip">Edit me — rapid/public rates vary a lot</span>
             </label>
           </div>
         </div>
 
         <div class="section">
-          <h2>Petrol comparison</h2>
+          <h2>Comparable petrol car (all-in)</h2>
           <div class="fields">
+            <label>Petrol lease / finance (£/mo)
+              <input type="number" id="petrolLease" min="0" step="10" value="520" />
+            </label>
+            <label>Upfront deposit (£)
+              <input type="number" id="petrolDeposit" min="0" step="50" value="1500" />
+            </label>
+            <label>Lease / finance term (months)
+              <input type="number" id="petrolTerm" min="1" step="1" value="36" />
+            </label>
+            <label>Insurance (£/mo)
+              <input type="number" id="petrolIns" min="0" step="5" value="70" />
+              <span class="tip">Often included in salary sacrifice</span>
+            </label>
+            <label>VED / road tax (£/year)
+              <input type="number" id="petrolVed" min="0" step="10" value="195" />
+            </label>
+            <label>Servicing / maintenance (£/year)
+              <input type="number" id="petrolService" min="0" step="10" value="300" />
+            </label>
+            <label>Tyres (£/year)
+              <input type="number" id="petrolTyres" min="0" step="10" value="150" />
+            </label>
+            <label>Breakdown cover (£/year)
+              <input type="number" id="petrolBreakdown" min="0" step="5" value="90" />
+            </label>
             <label>Current car MPG
-              <input type="number" id="mpg" min="1" step="0.1" value="40" />
+              <input type="number" id="mpg" min="1" step="0.1" value="40" class="volatile" />
+              <span class="tip">Edit me — your current car</span>
             </label>
             <label>Petrol price (£/litre)
-              <input type="number" id="petrol" min="0" step="0.01" value="1.42" />
+              <input type="number" id="petrol" min="0" step="0.01" value="1.68" class="volatile" />
+              <span class="tip">Edit me — UK avg ~£1.68/L mid-Sep 2026. Use your local pump</span>
             </label>
           </div>
         </div>
       </form>
 
       <div class="results">
-        <div class="hero">
-          <div class="label">Total estimated monthly EV cost</div>
-          <div class="big" id="totalEv">£0</div>
-          <div class="sub" id="vsPetrol">vs petrol fuel</div>
+        <div class="hero" id="hero">
+          <div class="label" id="heroLabel">Estimated EV salary-sacrifice saving</div>
+          <div class="big" id="heroBig">£0</div>
+          <div class="sub" id="heroSub">all-in monthly vs comparable petrol</div>
+        </div>
+        <div class="compare">
+          <div class="box">
+            <div class="k">EV salary sacrifice all-in</div>
+            <div class="v" id="evAllIn">£0</div>
+          </div>
+          <div class="box">
+            <div class="k">Petrol equivalent all-in</div>
+            <div class="v" id="petrolAllIn">£0</div>
+          </div>
         </div>
         <div class="metrics">
           <div class="metric"><div class="k">Net sacrifice cost</div><div class="v" id="netSacrifice">£0</div></div>
           <div class="metric"><div class="k">BiK tax / month</div><div class="v" id="bikMonth">£0</div></div>
           <div class="metric"><div class="k">Tax + NI saved / mo</div><div class="v" id="saved">£0</div></div>
-          <div class="metric"><div class="k">Charging / month</div><div class="v" id="charging">£0</div></div>
+          <div class="metric"><div class="k">EV charging / month</div><div class="v" id="charging">£0</div></div>
           <div class="metric"><div class="k">Petrol fuel / month</div><div class="v" id="petrolCost">£0</div></div>
-          <div class="metric" id="deltaMetric"><div class="k">vs petrol fuel only</div><div class="v" id="delta">£0</div></div>
-          <div class="metric"><div class="k">vs personal lease + petrol</div><div class="v" id="vsPersonal">£0</div></div>
+          <div class="metric"><div class="k">Fuel saving only / mo</div><div class="v" id="fuelSaving">£0</div></div>
+          <div class="metric"><div class="k">Petrol non-fuel extras / mo</div><div class="v" id="petrolExtras">£0</div></div>
           <div class="metric"><div class="k">Effective vs gross sacrifice</div><div class="v" id="effectivePct">0%</div></div>
         </div>
         <div class="explainer" id="explainer"></div>
@@ -223,7 +290,7 @@
     </div>
 
     <footer>
-      <p><strong>Assumptions:</strong> Pure EV BiK 4% for 2026/27 (HMRC). England/NI/Wales PAYE bands with £12,570 personal allowance (tapers over £100k). Employee NI 8% / 2%. Scottish bands approximate 2026/27 starter–top rates. Student loan Plan 2 at 9% over £28,470 if enabled. Energy default uses Ofgem GB Direct Debit average electricity unit rate for Oct–Dec 2026 (26.32p/kWh). Estimates only — not tax or financial advice; employer schemes and salary packaging differ.</p>
+      <p><strong>Assumptions:</strong> Pure EV BiK 4% for 2026/27 (HMRC). England/NI/Wales PAYE bands with £12,570 personal allowance (tapers over £100k). Employee NI 8% / 2%. Scottish bands approximate. Student loan Plan 2 optional. Energy default uses Ofgem GB Direct Debit average electricity unit rate for Oct–Dec 2026 (26.32p/kWh) — many EV tariffs are cheaper overnight. Petrol default ~£1.68/L (UK weekly average mid-Sep 2026). Salary-sacrifice packages often include insurance, tax, servicing, tyres and breakdown; petrol defaults add those separately so the comparison is closer to like-for-like. Employer quotes vary — this does not guarantee EV is cheaper. Estimates only — not tax or financial advice.</p>
       <p>Sources: <a href="https://www.gov.uk/guidance/company-car-benefit-the-appropriate-percentage-480-appendix-2" target="_blank" rel="noopener">GOV.UK company car BiK</a> · <a href="https://www.ofgem.gov.uk/information-consumers/energy-advice-households/energy-price-cap-unit-rates-and-standing-charges" target="_blank" rel="noopener">Ofgem price cap</a></p>
     </footer>
   </div>
@@ -236,19 +303,21 @@
     const PA = 12570;
     const NI_PT = 12570;
     const NI_UEL = 50270;
-    const SL_THRESHOLD = 28470; // Plan 2 approx
+    const SL_THRESHOLD = 28470;
+
+    function personalAllowance(income) {
+      if (income <= 100000) return PA;
+      if (income >= 125140) return 0;
+      return Math.max(0, PA - Math.floor((income - 100000) / 2));
+    }
 
     function englandTax(income) {
       const pa = personalAllowance(income);
       const taxable = Math.max(0, income - pa);
-      let tax = 0;
       const basic = Math.min(taxable, 37700);
       const higher = Math.min(Math.max(taxable - 37700, 0), 87440);
       const additional = Math.max(taxable - 37700 - 87440, 0);
-      tax += basic * 0.20;
-      tax += higher * 0.40;
-      tax += additional * 0.45;
-      return tax;
+      return basic * 0.20 + higher * 0.40 + additional * 0.45;
     }
 
     function scotlandTax(income) {
@@ -270,12 +339,6 @@
         if (left <= 0) break;
       }
       return tax;
-    }
-
-    function personalAllowance(income) {
-      if (income <= 100000) return PA;
-      if (income >= 125140) return 0;
-      return Math.max(0, PA - Math.floor((income - 100000) / 2));
     }
 
     function employeeNI(income) {
@@ -300,35 +363,29 @@
       return (plus - base) / 100;
     }
 
+    function num(id) {
+      const v = parseFloat(document.getElementById(id).value);
+      return Number.isFinite(v) ? v : 0;
+    }
+
     function calc() {
       const salary = num('salary');
       const region = document.getElementById('region').value;
       const sacrificeMonthly = num('sacrifice');
       const sacrificeAnnual = sacrificeMonthly * 12;
       const p11d = num('p11d');
-      const personalLease = num('personalLease');
       const sl = document.getElementById('studentLoan').checked;
-
       const salaryAfter = Math.max(0, salary - sacrificeAnnual);
 
-      const tax0 = incomeTax(salary, region);
-      const tax1 = incomeTax(salaryAfter, region);
-      const ni0 = employeeNI(salary);
-      const ni1 = employeeNI(salaryAfter);
-      const sl0 = studentLoan(salary, sl);
-      const sl1 = studentLoan(salaryAfter, sl);
-
-      const taxSaved = tax0 - tax1;
-      const niSaved = ni0 - ni1;
-      const slSaved = sl0 - sl1;
+      const taxSaved = incomeTax(salary, region) - incomeTax(salaryAfter, region);
+      const niSaved = employeeNI(salary) - employeeNI(salaryAfter);
+      const slSaved = studentLoan(salary, sl) - studentLoan(salaryAfter, sl);
       const totalSavedAnnual = taxSaved + niSaved + slSaved;
 
       const bikValue = p11d * 0.04;
       const mrate = marginalIncomeTaxRate(salaryAfter, region);
       const bikTaxAnnual = bikValue * mrate;
-
-      const netSacrificeAnnual = sacrificeAnnual - totalSavedAnnual + bikTaxAnnual;
-      const netSacrificeMonthly = netSacrificeAnnual / 12;
+      const netSacrificeMonthly = (sacrificeAnnual - totalSavedAnnual + bikTaxAnnual) / 12;
 
       const miles = num('miles');
       const mpkwh = Math.max(0.1, num('mpkwh'));
@@ -336,53 +393,60 @@
       const homeRate = num('homeRate') / 100;
       const publicRate = num('publicRate') / 100;
       const kwhYear = miles / mpkwh;
-      const chargeYear = kwhYear * homePct * homeRate + kwhYear * (1 - homePct) * publicRate;
-      const chargeMonth = chargeYear / 12;
+      const chargeMonth = (kwhYear * homePct * homeRate + kwhYear * (1 - homePct) * publicRate) / 12;
 
       const mpg = Math.max(0.1, num('mpg'));
       const petrolPerLitre = num('petrol');
       const litresYear = (miles / mpg) * 4.54609;
-      const petrolYear = litresYear * petrolPerLitre;
-      const petrolMonth = petrolYear / 12;
+      const petrolMonth = (litresYear * petrolPerLitre) / 12;
 
-      const totalEvMonth = netSacrificeMonthly + chargeMonth;
-      const petrolOnlyMonth = petrolMonth;
-      const personalPlusPetrol = personalLease + petrolMonth;
-      const vsPetrol = totalEvMonth - petrolOnlyMonth;
-      const vsPers = totalEvMonth - personalPlusPetrol;
+      const petrolLease = num('petrolLease');
+      const petrolDepositMonthly = num('petrolDeposit') / Math.max(1, num('petrolTerm'));
+      const petrolExtrasMonthly =
+        num('petrolIns') +
+        num('petrolVed') / 12 +
+        num('petrolService') / 12 +
+        num('petrolTyres') / 12 +
+        num('petrolBreakdown') / 12 +
+        petrolDepositMonthly;
+
+      const evAllIn = netSacrificeMonthly + chargeMonth;
+      const petrolAllIn = petrolLease + petrolMonth + petrolExtrasMonthly;
+      const saving = petrolAllIn - evAllIn;
+      const fuelSaving = petrolMonth - chargeMonth;
       const effective = sacrificeMonthly > 0 ? (netSacrificeMonthly / sacrificeMonthly) * 100 : 0;
 
-      document.getElementById('totalEv').textContent = fmt(totalEvMonth);
-      document.getElementById('vsPetrol').textContent =
-        vsPetrol <= 0
-          ? (fmt2(Math.abs(vsPetrol)) + ' /mo less than petrol fuel alone (car cost included on EV side)')
-          : (fmt2(vsPetrol) + ' /mo more than petrol fuel alone \u2014 compare against personal lease below');
+      const hero = document.getElementById('hero');
+      if (saving >= 0) {
+        hero.classList.remove('bad');
+        document.getElementById('heroLabel').textContent = 'Estimated EV salary-sacrifice saving';
+        document.getElementById('heroBig').textContent = fmt(saving) + '/mo';
+        document.getElementById('heroSub').textContent = 'all-in monthly vs comparable petrol car';
+      } else {
+        hero.classList.add('bad');
+        document.getElementById('heroLabel').textContent = 'Estimated EV salary-sacrifice extra cost';
+        document.getElementById('heroBig').textContent = fmt(Math.abs(saving)) + '/mo';
+        document.getElementById('heroSub').textContent = 'all-in monthly vs comparable petrol car';
+      }
 
+      document.getElementById('evAllIn').textContent = fmt2(evAllIn);
+      document.getElementById('petrolAllIn').textContent = fmt2(petrolAllIn);
       document.getElementById('netSacrifice').textContent = fmt2(netSacrificeMonthly);
       document.getElementById('bikMonth').textContent = fmt2(bikTaxAnnual / 12);
       document.getElementById('saved').textContent = fmt2(totalSavedAnnual / 12);
       document.getElementById('charging').textContent = fmt2(chargeMonth);
       document.getElementById('petrolCost').textContent = fmt2(petrolMonth);
-      const deltaEl = document.getElementById('delta');
-      const deltaMetric = document.getElementById('deltaMetric');
-      deltaEl.textContent = (vsPetrol <= 0 ? '-' : '+') + fmt2(Math.abs(vsPetrol)).slice(1);
-      deltaMetric.className = 'metric ' + (vsPetrol <= 0 ? 'good' : 'bad');
-      document.getElementById('vsPersonal').textContent = (vsPers <= 0 ? '-' : '+') + fmt2(Math.abs(vsPers)).slice(1);
+      document.getElementById('fuelSaving').textContent = (fuelSaving >= 0 ? '' : '-') + fmt2(Math.abs(fuelSaving));
+      document.getElementById('petrolExtras').textContent = fmt2(petrolExtrasMonthly);
       document.getElementById('effectivePct').textContent = effective.toFixed(0) + '% of gross';
 
       document.getElementById('explainer').innerHTML =
-        '<strong>How this is worked out.</strong> Giving up ' + fmt(sacrificeMonthly) + '/mo from gross pay saves about ' +
-        fmt2(totalSavedAnnual/12) + '/mo in tax' + (sl ? ', NI and student loan' : ' and NI') + '. ' +
-        'BiK at 4% of ' + fmt(p11d) + ' is ' + fmt(bikValue) + '/year taxable (~' + fmt2(bikTaxAnnual/12) +
-        '/mo at your marginal rate). Net car cost \u2248 ' + fmt2(netSacrificeMonthly) + '/mo. Charging ' +
-        miles.toLocaleString('en-GB') + ' miles/year at ' + (homePct*100) + '% home (' + num('homeRate') +
-        'p/kWh) adds ' + fmt2(chargeMonth) + '/mo. Petrol at ' + num('mpg') + ' mpg and ' + fmt2(petrolPerLitre) +
-        '/L would be about ' + fmt2(petrolMonth) + '/mo in fuel only.';
-    }
-
-    function num(id) {
-      const v = parseFloat(document.getElementById(id).value);
-      return Number.isFinite(v) ? v : 0;
+        '<strong>How this is worked out.</strong> EV all-in = net salary-sacrifice cost after tax/NI/BiK (' +
+        fmt2(netSacrificeMonthly) + ') + charging (' + fmt2(chargeMonth) + '). ' +
+        'Petrol all-in = lease/finance (' + fmt2(petrolLease) + ') + fuel (' + fmt2(petrolMonth) +
+        ') + insurance/tax/servicing/tyres/breakdown/deposit spread (' + fmt2(petrolExtrasMonthly) +
+        '). Headline saving is petrol all-in minus EV all-in. Fuel-only saving is secondary. ' +
+        'Edit yellow fields for your real pump price and tariff. Schemes vary — this does not guarantee EV is cheaper.';
     }
 
     document.getElementById('form').addEventListener('input', calc);
