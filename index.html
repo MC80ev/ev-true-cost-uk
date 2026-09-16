@@ -29,6 +29,7 @@
     .section+.section{margin-top:16px;padding-top:16px;border-top:1px solid var(--line)}
     .fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     @media(max-width:560px){.fields{grid-template-columns:1fr}}
+    .span2{grid-column:1/-1}
     label{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted)}
     .tip{font-size:11px;opacity:.9}
     input,select{background:var(--panel-2);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:10px 12px;font-size:15px;outline:none}
@@ -38,6 +39,10 @@
     .check input{width:16px;height:16px}
     .callout{margin:0 0 14px;padding:10px 12px;border-radius:10px;background:rgba(240,180,41,.1);border:1px solid rgba(240,180,41,.35);font-size:13px}
     .callout strong{color:var(--warn)}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);border-radius:10px;padding:9px 14px;font-size:13px;font-weight:600;cursor:pointer;margin-top:4px}
+    .btn:hover{border-color:rgba(61,214,140,.45);background:rgba(61,214,140,.1)}
+    .btn.secondary{background:transparent;color:var(--muted);font-weight:600}
+    .btn.secondary:hover{color:var(--text)}
     .results{position:sticky;top:16px;display:flex;flex-direction:column;gap:12px}
     .hero{background:linear-gradient(145deg,#1f3d31,#1a222c 55%);border:1px solid rgba(61,214,140,.35);border-radius:var(--radius);padding:18px}
     .hero.bad{background:linear-gradient(145deg,#3d1f1f,#1a222c 55%);border-color:rgba(255,107,107,.35)}
@@ -72,6 +77,10 @@
           <div class="section">
             <h2>EV salary sacrifice</h2>
             <div class="fields">
+              <label class="span2">EV model (optional)
+                <select id="ss_evModel"><option value="">Custom / enter your own</option></select>
+                <span class="tip" id="ss_evTip" hidden>Estimate — replace with your quote</span>
+              </label>
               <label>Gross annual salary (£)<input type="number" id="ss_salary" min="0" step="100" value="45000"></label>
               <label>Tax region
                 <select id="ss_region"><option value="england" selected>England / NI / Wales</option><option value="scotland">Scotland</option></select>
@@ -92,12 +101,16 @@
               <label>Night electricity (p/kWh)<input class="volatile" type="number" id="ss_nightRate" min="0" step="0.01" value="8.00"><span class="tip">Edit me — EV overnight tariffs</span></label>
               <label>Day electricity (p/kWh)<input class="volatile" type="number" id="ss_dayRate" min="0" step="0.01" value="26.32"><span class="tip">Edit me — or Ofgem-style day rate</span></label>
               <label>Public charging (p/kWh)<input class="volatile" type="number" id="ss_publicRate" min="0" step="0.1" value="55"></label>
-              <label>Extra household cost from EV tariff (£/yr)<input class="volatile" type="number" id="ss_tariffExtra" min="0" step="10" value="0"><span class="tip">Standing charge / higher day rates on house use — AlGunner point</span></label>
+              <label>Extra household cost from EV tariff (£/yr)<input class="volatile" type="number" id="ss_tariffExtra" min="0" step="10" value="0"><span class="tip">Standing charge / higher day rates on house use</span></label>
             </div>
           </div>
           <div class="section">
             <h2>Comparable petrol car (all-in)</h2>
             <div class="fields">
+              <label class="span2">Petrol model (optional)
+                <select id="ss_iceModel"><option value="">Custom / enter your own</option></select>
+                <span class="tip" id="ss_iceTip" hidden>Estimate — replace with your quote</span>
+              </label>
               <label>Petrol lease / finance (£/mo)<input type="number" id="ss_petrolLease" min="0" step="10" value="520"></label>
               <label>Upfront deposit (£)<input type="number" id="ss_petrolDeposit" min="0" step="50" value="1500"></label>
               <label>Term (months)<input type="number" id="ss_petrolTerm" min="1" step="1" value="36"></label>
@@ -130,7 +143,7 @@
       <div class="grid">
         <form class="card" id="form-own" autocomplete="off">
           <div class="section">
-            <div class="callout"><strong>Need both:</strong> ICE market value and EV on-the-road price before the headline will calculate.</div>
+            <div class="callout"><strong>Example loaded:</strong> £8,000 ICE trade-in vs £28,000 EV over 5 years — edit the yellow fields to your numbers. Headline updates live. Dropdowns fill ballpark estimates you can override.</div>
             <h2>Shared</h2>
             <div class="fields">
               <label>Horizon (years)
@@ -151,7 +164,11 @@
           <div class="section">
             <h2>Keep ICE</h2>
             <div class="fields">
-              <label>ICE market value today (£)<input class="volatile" type="number" id="own_iceValue" min="0" step="100" value=""><span class="tip">Required</span></label>
+              <label class="span2">Your petrol car (optional)
+                <select id="own_iceModel"><option value="">Custom / enter your own</option></select>
+                <span class="tip" id="own_iceTip" hidden>Estimate — replace with your figures</span>
+              </label>
+              <label>ICE market value today (£)<input class="volatile" type="number" id="own_iceValue" min="0" step="100" value="8000"><span class="tip">Example — edit to your trade-in/sale price</span></label>
               <label>ICE finance still owed (£)<input type="number" id="own_iceFinance" min="0" step="100" value="0"></label>
               <label>Expected ICE value at end (£)<input type="number" id="own_iceResidual" min="0" step="100" value=""><span class="tip">Blank = auto ~12%/yr</span></label>
               <label>Insurance (£/yr)<input type="number" id="own_iceIns" min="0" step="10" value="840"></label>
@@ -164,7 +181,11 @@
           <div class="section">
             <h2>Buy EV</h2>
             <div class="fields">
-              <label>EV on-the-road price (£)<input class="volatile" type="number" id="own_evOtr" min="0" step="100" value=""><span class="tip">Required</span></label>
+              <label class="span2">EV you're considering (optional)
+                <select id="own_evModel"><option value="">Custom / enter your own</option></select>
+                <span class="tip" id="own_evTip" hidden>Estimate — replace with your quote</span>
+              </label>
+              <label>EV on-the-road price (£)<input class="volatile" type="number" id="own_evOtr" min="0" step="100" value="28000"><span class="tip">Example — edit to the EV you're looking at</span></label>
               <label>Trade-in / sale credit (£)<input type="number" id="own_tradeIn" min="0" step="100" value=""><span class="tip">Blank = ICE market value</span></label>
               <label>Extra cash deposit (£)<input type="number" id="own_cashDeposit" min="0" step="100" value="0"></label>
               <label>Home charger install (£)<input type="number" id="own_charger" min="0" step="50" value="0"><span class="tip">~£800 if you need a wallbox</span></label>
@@ -179,12 +200,13 @@
               <label>Servicing (£/yr)<input type="number" id="own_evService" min="0" step="10" value="180"></label>
               <label>Tyres (£/yr)<input type="number" id="own_evTyres" min="0" step="10" value="180"></label>
               <label>Breakdown (£/yr)<input type="number" id="own_evBreakdown" min="0" step="10" value="90"></label>
+              <label class="span2"><button type="button" class="btn secondary" id="own_resetExample">Reset to example</button></label>
             </div>
           </div>
         </form>
         <div class="results">
           <div class="hero" id="own_hero"><div class="label" id="own_heroLabel">Enter ICE value and EV price</div><div class="big" id="own_heroBig">—</div><div class="sub" id="own_heroSub">cash advantage over the horizon (incl. residuals)</div></div>
-          <div class="need" id="own_need">Add ICE market value and EV OTR price to unlock the headline.</div>
+          <div class="need" id="own_need">Enter ICE market value and EV OTR price to unlock the headline.</div>
           <div class="compare"><div class="box"><div class="k">Keep ICE net cost</div><div class="v" id="own_iceNet">—</div></div><div class="box"><div class="k">Buy EV net cost</div><div class="v" id="own_evNet">—</div></div></div>
           <div class="metrics">
             <div class="metric"><div class="k">Break-even</div><div class="v" id="own_be">—</div></div>
@@ -192,13 +214,13 @@
             <div class="metric"><div class="k">ICE fuel total</div><div class="v" id="own_iceFuel">—</div></div>
             <div class="metric"><div class="k">EV charging + tariff extra</div><div class="v" id="own_evCharge">—</div></div>
           </div>
-          <div class="explainer" id="own_explainer">Ownership mode: keep driving your petrol car versus selling/trading it and buying an EV. Residuals are estimates — override if you have better numbers.</div>
+          <div class="explainer" id="own_explainer">Example scenario: sell/trade an £8k petrol car and buy a £28k EV, 8,000 miles/yr, mostly home overnight charging. Use the model dropdowns for ballpark estimates, or Reset to example. Change any field — especially price, insurance and residuals.</div>
         </div>
       </div>
     </div>
 
     <footer>
-      <p><strong>Assumptions:</strong> Salary-sacrifice BiK 4% pure EV (2026/27). Ownership mode uses simple HP-style finance and straight depreciation if residuals are blank (ICE ~12%/yr, EV ~15%/yr). VED/ECS simplified. Extra household EV-tariff cost is user-entered (standing charge / higher day rates). Estimates only — not financial advice. Schemes and quotes vary.</p>
+      <p><strong>Assumptions:</strong> Salary-sacrifice BiK 4% pure EV (2026/27). Ownership mode uses simple HP-style finance and straight depreciation if residuals are blank (ICE ~12%/yr, EV ~15%/yr). VED/ECS simplified. Extra household EV-tariff cost is user-entered (standing charge / higher day rates). Model prices and running costs in the dropdowns are static Sep-2026-style ballpark estimates, not live quotes — always override with your own figures. Estimates only — not financial advice. Schemes and quotes vary.</p>
       <p>Sources: <a href="https://www.gov.uk/guidance/company-car-benefit-the-appropriate-percentage-480-appendix-2" target="_blank" rel="noopener">GOV.UK BiK</a> · <a href="https://www.ofgem.gov.uk/information-consumers/energy-advice-households/energy-price-cap-unit-rates-and-standing-charges" target="_blank" rel="noopener">Ofgem price cap</a></p>
     </footer>
   </div>
@@ -207,8 +229,52 @@
   const fmt=n=>GBP+(Math.round(n*100)/100).toLocaleString('en-GB',{minimumFractionDigits:0,maximumFractionDigits:0});
   const fmt2=n=>GBP+(Math.round(n*100)/100).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2});
   const PA=12570,NI_PT=12570,NI_UEL=50270,SL_T=28470;
+
+  /* Static curated UK ballparks (Sep-2026 style). Not live quotes. */
+  const CARS = {
+    ice: [
+      {id:'corsa', name:'Vauxhall Corsa 1.2 (~3–5yr used)', usedValue:8000, mpg:48, insYr:720, vedYr:195, serviceYr:250, tyresYr:140, leaseMo:280, leaseDeposit:1000, leaseTerm:36},
+      {id:'focus', name:'Ford Focus 1.0 EcoBoost (~3–5yr)', usedValue:10000, mpg:45, insYr:780, vedYr:195, serviceYr:280, tyresYr:150, leaseMo:320, leaseDeposit:1200, leaseTerm:36},
+      {id:'golf', name:'VW Golf 1.5 TSI (~3–5yr)', usedValue:14000, mpg:44, insYr:850, vedYr:195, serviceYr:320, tyresYr:160, leaseMo:380, leaseDeposit:1500, leaseTerm:36},
+      {id:'corolla', name:'Toyota Corolla Hybrid (~3–5yr)', usedValue:15500, mpg:55, insYr:800, vedYr:195, serviceYr:260, tyresYr:150, leaseMo:360, leaseDeposit:1400, leaseTerm:36},
+      {id:'qashqai', name:'Nissan Qashqai 1.3 DIG-T (~3–5yr)', usedValue:14500, mpg:40, insYr:900, vedYr:195, serviceYr:320, tyresYr:180, leaseMo:400, leaseDeposit:1500, leaseTerm:36},
+      {id:'octavia', name:'Skoda Octavia 1.5 TSI (~3–5yr)', usedValue:13000, mpg:48, insYr:780, vedYr:195, serviceYr:280, tyresYr:150, leaseMo:340, leaseDeposit:1300, leaseTerm:36},
+      {id:'a3', name:'Audi A3 35 TFSI (~3–5yr)', usedValue:17000, mpg:42, insYr:950, vedYr:195, serviceYr:380, tyresYr:180, leaseMo:450, leaseDeposit:1800, leaseTerm:36},
+      {id:'3series', name:'BMW 320i (~3–5yr)', usedValue:20000, mpg:38, insYr:1100, vedYr:195, serviceYr:420, tyresYr:200, leaseMo:520, leaseDeposit:2000, leaseTerm:36},
+      {id:'tucson', name:'Hyundai Tucson 1.6 (~3–5yr)', usedValue:16500, mpg:38, insYr:880, vedYr:195, serviceYr:300, tyresYr:180, leaseMo:420, leaseDeposit:1600, leaseTerm:36},
+      {id:'sportage', name:'Kia Sportage 1.6 (~3–5yr)', usedValue:16000, mpg:39, insYr:860, vedYr:195, serviceYr:290, tyresYr:180, leaseMo:410, leaseDeposit:1500, leaseTerm:36},
+      {id:'mini', name:'MINI Cooper (~3–5yr)', usedValue:12000, mpg:45, insYr:820, vedYr:195, serviceYr:300, tyresYr:160, leaseMo:350, leaseDeposit:1400, leaseTerm:36}
+    ],
+    ev: [
+      {id:'mg4', name:'MG4 EV (new OTR ballpark)', otr:28000, p11d:26995, sacrificeMo:380, mpkwh:4.0, insYr:900, ved1:10, vedLater:195, serviceYr:160, residualHint:'Strong value EV'},
+      {id:'r5', name:'Renault 5 E-Tech (new OTR ballpark)', otr:27000, p11d:25995, sacrificeMo:360, mpkwh:4.1, insYr:850, ved1:10, vedLater:195, serviceYr:150},
+      {id:'leaf', name:'Nissan Leaf (new OTR ballpark)', otr:30000, p11d:28995, sacrificeMo:400, mpkwh:3.7, insYr:880, ved1:10, vedLater:195, serviceYr:170},
+      {id:'id3', name:'VW ID.3 (new OTR ballpark)', otr:36000, p11d:34990, sacrificeMo:470, mpkwh:3.9, insYr:950, ved1:10, vedLater:195, serviceYr:180},
+      {id:'born', name:'Cupra Born (new OTR ballpark)', otr:37000, p11d:35990, sacrificeMo:480, mpkwh:3.9, insYr:980, ved1:10, vedLater:195, serviceYr:180},
+      {id:'kona', name:'Hyundai Kona Electric (new OTR ballpark)', otr:37500, p11d:36495, sacrificeMo:490, mpkwh:3.8, insYr:920, ved1:10, vedLater:195, serviceYr:170},
+      {id:'niro', name:'Kia Niro EV (new OTR ballpark)', otr:38500, p11d:37495, sacrificeMo:500, mpkwh:3.8, insYr:940, ved1:10, vedLater:195, serviceYr:170},
+      {id:'m3', name:'Tesla Model 3 (new OTR ballpark)', otr:40000, p11d:39990, sacrificeMo:520, mpkwh:4.2, insYr:1100, ved1:10, vedLater:195, serviceYr:150},
+      {id:'enyaq', name:'Skoda Enyaq (new OTR ballpark)', otr:42000, p11d:40990, sacrificeMo:550, mpkwh:3.6, insYr:1000, ved1:10, vedLater:195, serviceYr:190},
+      {id:'my', name:'Tesla Model Y (new OTR ballpark)', otr:46000, p11d:44990, sacrificeMo:590, mpkwh:3.8, insYr:1200, ved1:10, vedLater:195, serviceYr:160},
+      {id:'ix1', name:'BMW iX1 (new OTR ballpark)', otr:47000, p11d:45905, sacrificeMo:610, mpkwh:3.5, insYr:1250, ved1:10, vedLater:195, serviceYr:220},
+      {id:'p2', name:'Polestar 2 (new OTR ballpark)', otr:48000, p11d:46900, sacrificeMo:620, mpkwh:3.6, insYr:1300, ved1:10, vedLater:195, serviceYr:200}
+    ]
+  };
+
   function num(id){const v=parseFloat(document.getElementById(id).value);return Number.isFinite(v)?v:0}
   function has(id){const el=document.getElementById(id);return el && el.value!=='' && Number.isFinite(parseFloat(el.value))}
+  function setVal(id,v){const el=document.getElementById(id); if(el) el.value=v}
+  function findCar(list,id){return list.find(c=>c.id===id)}
+  function fillSelect(selId, list){
+    const sel=document.getElementById(selId);
+    list.forEach(c=>{
+      const o=document.createElement('option');
+      o.value=c.id; o.textContent=c.name;
+      sel.appendChild(o);
+    });
+  }
+  function showTip(id, on){const t=document.getElementById(id); if(t) t.hidden=!on}
+
   function pa(i){if(i<=100000)return PA;if(i>=125140)return 0;return Math.max(0,PA-Math.floor((i-100000)/2))}
   function engTax(i){const t=Math.max(0,i-pa(i));const b=Math.min(t,37700);const h=Math.min(Math.max(t-37700,0),87440);const a=Math.max(t-37700-87440,0);return b*.2+h*.4+a*.45}
   function scoTax(i){const t=Math.max(0,i-pa(i));const bands=[[2827,.19],[14921-2827,.2],[31092-14921,.21],[62430-31092,.42],[125140-62430,.45],[Infinity,.48]];let left=t,tax=0;for(const [w,r] of bands){const c=Math.min(left,w);tax+=c*r;left-=c;if(left<=0)break}return tax}
@@ -239,6 +305,101 @@
     return bal;
   }
 
+  function applySsEv(){
+    const id=document.getElementById('ss_evModel').value;
+    const tipOn=!!id;
+    showTip('ss_evTip', tipOn);
+    if(!id) return;
+    const c=findCar(CARS.ev,id); if(!c) return;
+    setVal('ss_p11d', c.p11d);
+    setVal('ss_sacrifice', c.sacrificeMo);
+    setVal('ss_mpkwh', c.mpkwh);
+    calcSS();
+  }
+  function applySsIce(){
+    const id=document.getElementById('ss_iceModel').value;
+    const tipOn=!!id;
+    showTip('ss_iceTip', tipOn);
+    if(!id) return;
+    const c=findCar(CARS.ice,id); if(!c) return;
+    setVal('ss_petrolLease', c.leaseMo);
+    setVal('ss_petrolDeposit', c.leaseDeposit);
+    setVal('ss_petrolTerm', c.leaseTerm);
+    setVal('ss_mpg', c.mpg);
+    setVal('ss_petrolIns', Math.round((c.insYr/12)*10)/10);
+    setVal('ss_petrolVed', c.vedYr);
+    setVal('ss_petrolService', c.serviceYr);
+    if(c.tyresYr!=null) setVal('ss_petrolTyres', c.tyresYr);
+    calcSS();
+  }
+  function applyOwnIce(){
+    const id=document.getElementById('own_iceModel').value;
+    showTip('own_iceTip', !!id);
+    if(!id) return;
+    const c=findCar(CARS.ice,id); if(!c) return;
+    setVal('own_iceValue', c.usedValue);
+    setVal('own_mpg', c.mpg);
+    setVal('own_iceIns', c.insYr);
+    setVal('own_iceVed', c.vedYr);
+    setVal('own_iceService', c.serviceYr);
+    if(c.tyresYr!=null) setVal('own_iceTyres', c.tyresYr);
+    calcOwn();
+  }
+  function applyOwnEv(){
+    const id=document.getElementById('own_evModel').value;
+    showTip('own_evTip', !!id);
+    if(!id) return;
+    const c=findCar(CARS.ev,id); if(!c) return;
+    setVal('own_evOtr', c.otr);
+    setVal('own_mpkwh', c.mpkwh);
+    setVal('own_evIns', c.insYr);
+    setVal('own_evVed1', c.ved1);
+    setVal('own_evVed', c.vedLater);
+    setVal('own_evService', c.serviceYr);
+    calcOwn();
+  }
+  function resetOwnExample(){
+    document.getElementById('own_iceModel').value='';
+    document.getElementById('own_evModel').value='';
+    showTip('own_iceTip', false);
+    showTip('own_evTip', false);
+    setVal('own_years', 5);
+    setVal('own_miles', 8000);
+    setVal('own_mpg', 40);
+    setVal('own_petrol', 1.68);
+    setVal('own_mpkwh', 4.0);
+    setVal('own_homePct', 80);
+    setVal('own_nightPct', 90);
+    setVal('own_nightRate', 8.00);
+    setVal('own_dayRate', 26.32);
+    setVal('own_publicRate', 55);
+    setVal('own_tariffExtra', 0);
+    setVal('own_iceValue', 8000);
+    setVal('own_iceFinance', 0);
+    setVal('own_iceResidual', '');
+    setVal('own_iceIns', 840);
+    setVal('own_iceVed', 200);
+    setVal('own_iceService', 300);
+    setVal('own_iceTyres', 150);
+    setVal('own_iceOther', 140);
+    setVal('own_evOtr', 28000);
+    setVal('own_tradeIn', '');
+    setVal('own_cashDeposit', 0);
+    setVal('own_charger', 0);
+    setVal('own_grant', 0);
+    setVal('own_apr', 8.9);
+    setVal('own_term', 48);
+    setVal('own_evResidual', '');
+    setVal('own_evIns', 900);
+    setVal('own_evVed1', 10);
+    setVal('own_evVed', 200);
+    setVal('own_evEcs', 0);
+    setVal('own_evService', 180);
+    setVal('own_evTyres', 180);
+    setVal('own_evBreakdown', 90);
+    calcOwn();
+  }
+
   function calcSS(){
     const salary=num('ss_salary'), region=document.getElementById('ss_region').value;
     const sacM=num('ss_sacrifice'), sacY=sacM*12, p11d=num('ss_p11d');
@@ -259,7 +420,7 @@
     document.getElementById('ss_charge').textContent=fmt2(charge);
     document.getElementById('ss_fuel').textContent=fmt2(fuel);
     document.getElementById('ss_fuelSave').textContent=fmt2(fuel-charge+num('ss_tariffExtra')/12);
-    document.getElementById('ss_explainer').innerHTML='<strong>How this works.</strong> EV all-in = net sacrifice after tax/NI/BiK + charging (day/night mix) + any extra household EV-tariff cost. Petrol all-in = lease + fuel + insurance/tax/service/tyres/breakdown/deposit spread. Edit yellow fields.';
+    document.getElementById('ss_explainer').innerHTML='<strong>How this works.</strong> EV all-in = net sacrifice after tax/NI/BiK + charging (day/night mix) + any extra household EV-tariff cost. Petrol all-in = lease + fuel + insurance/tax/service/tyres/breakdown/deposit spread. Optional model dropdowns fill ballpark estimates — edit yellow fields.';
   }
 
   function calcOwn(){
@@ -280,15 +441,6 @@
     const iceRes=has('own_iceResidual')?num('own_iceResidual'):iceVal*Math.pow(1-0.12,years);
     const iceRunYr=num('own_iceIns')+num('own_iceVed')+num('own_iceService')+num('own_iceTyres')+num('own_iceOther');
     const iceFuelTot=fuelMo*months, iceRunTot=iceRunYr*years;
-    // Simple: remaining finance assumed paid linearly over horizon if owed (or full if shorter)
-    const iceFinPaid=iceFin; // clear over ownership period / opportunity: treat outstanding as cash cost if keeping? Better: if keeping ICE with finance, user still pays it. Use full balance as cost if term unknown — simplify: add remaining finance as cash that must be paid somehow; residual reduced by 0 at end if cleared.
-    // Cleaner v1: keeping ICE means you forgo selling today. Net cost = running+fuel - (end residual - remaining finance assumed cleared by end via depreciation path).
-    // Opportunity framing used by EV Costs: ice_net = running + fuel - end_equity, where start equity isn't cashed.
-    // Compare "cash to operate + opportunity of capital in the car":
-    const iceEndEquity=Math.max(0,iceRes); // assume finance cleared from cashflow separately if any — if finance owed, reduce end equity
-    const iceNet=iceRunTot+iceFuelTot+Math.max(0,iceFin) - iceEndEquity;
-    // Actually if they keep the car and still owe finance, they pay finance + running, and have residual-finance at end.
-    // ice_net_position = running + fuel + finance_paid - end_equity. If we don't know schedule, assume finance is cleared by end from payments totaling iceFin (interest ignored for ICE keep).
     const iceNetPos=iceRunTot+iceFuelTot+iceFin - Math.max(0,iceRes);
 
     const evOtr=num('own_evOtr');
@@ -301,11 +453,8 @@
     const payMonths=Math.min(months,term);
     const financePaid=monthlyFin*payMonths;
     const balEnd=remainingPrincipal(apr,term,financed,payMonths);
-    const cashAtPurchase=Math.max(0, num('own_cashDeposit') + Math.max(0, iceFin-trade)) + num('own_charger'); // negative equity cheque if trade < finance
-    // If trade covers finance, deposit is optional cash; if trade < finance, need to clear shortfall.
     const shortfall=Math.max(0, iceFin-trade);
     const day0=shortfall + num('own_cashDeposit') + num('own_charger') - num('own_grant');
-    // financed already uses equity after clearing finance
     const evRes=has('own_evResidual')?num('own_evResidual'):evOtr*Math.pow(1-0.15,years);
     let evVedTot=0;
     for(let y=1;y<=years;y++){
@@ -316,7 +465,7 @@
     const evChargeTot=chargeMoVal*months;
     const evNetPos=day0 + financePaid + evRunTot + evChargeTot - Math.max(0, evRes - balEnd);
 
-    const adv=iceNetPos - evNetPos; // +ve EV cheaper
+    const adv=iceNetPos - evNetPos;
     const hero=document.getElementById('own_hero');
     if(adv>=0){hero.classList.remove('bad');document.getElementById('own_heroLabel').textContent='Estimated cash advantage if you buy an EV';document.getElementById('own_heroBig').textContent=fmt(adv);}
     else{hero.classList.add('bad');document.getElementById('own_heroLabel').textContent='Estimated extra cost if you buy an EV';document.getElementById('own_heroBig').textContent=fmt(Math.abs(adv));}
@@ -327,17 +476,11 @@
     document.getElementById('own_iceFuel').textContent=fmt2(iceFuelTot);
     document.getElementById('own_evCharge').textContent=fmt2(evChargeTot);
 
-    // rough break-even: linear cumulative without residual until end credit at horizon
-    let be='Not within horizon';
     let iceCum=0, evCum=day0;
-    const iceMo=(iceRunYr/12)+fuelMo+(iceFin>0?iceFin/months:0);
-    const evMo=monthlyFin*(payMonths>0?1:0) + (evRunTot/months) + chargeMoVal;
-    // simpler month loop
-    iceCum=0; evCum=day0; let bal=financed; const r=(apr/100)/12; const pay=monthlyFin;
-    be='Not within horizon';
+    let bal=financed; const r=(apr/100)/12; const pay=monthlyFin;
+    let be='Not within horizon';
     for(let m=1;m<=months;m++){
       iceCum += (iceRunYr/12)+fuelMo;
-      // ICE finance simplification: spread balance evenly
       if(iceFin>0) iceCum += iceFin/months;
       if(m<=term && financed>0){
         bal = bal*(1+r)-pay; if(bal<0) bal=0;
@@ -349,10 +492,19 @@
       if(evPos<=icePos){ be='Month '+m; break; }
     }
     document.getElementById('own_be').textContent=be;
-    document.getElementById('own_explainer').innerHTML='<strong>How this works.</strong> Keep-ICE net ≈ running + fuel + clearing remaining finance − residual. Buy-EV net ≈ day-0 cash (shortfall/deposit/charger) + finance paid + running + charging/tariff extra − (residual − HP left). Trade-in defaults to ICE market value. Override residuals. Estimates only.';
+    document.getElementById('own_explainer').innerHTML='<strong>How this works.</strong> Example scenario starts at £8k ICE vs £28k EV over 5 years (Reset to example). Keep-ICE net ≈ running + fuel + clearing remaining finance − residual. Buy-EV net ≈ day-0 cash (shortfall/deposit/charger) + finance paid + running + charging/tariff extra − (residual − HP left). Model dropdowns fill static estimates you can override. Trade-in defaults to ICE market value.';
   }
 
   function bind(formId, fn){const f=document.getElementById(formId); f.addEventListener('input',fn); f.addEventListener('change',fn);}
+  fillSelect('ss_evModel', CARS.ev);
+  fillSelect('ss_iceModel', CARS.ice);
+  fillSelect('own_iceModel', CARS.ice);
+  fillSelect('own_evModel', CARS.ev);
+  document.getElementById('ss_evModel').addEventListener('change', applySsEv);
+  document.getElementById('ss_iceModel').addEventListener('change', applySsIce);
+  document.getElementById('own_iceModel').addEventListener('change', applyOwnIce);
+  document.getElementById('own_evModel').addEventListener('change', applyOwnEv);
+  document.getElementById('own_resetExample').addEventListener('click', resetOwnExample);
   bind('form-ss', calcSS); bind('form-own', calcOwn);
   document.querySelectorAll('.tab').forEach(btn=>{
     btn.addEventListener('click',()=>{
