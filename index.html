@@ -102,6 +102,8 @@
               <label>Day electricity (p/kWh)<input class="volatile" type="number" id="ss_dayRate" min="0" step="0.01" value="26.32"><span class="tip">Edit me — or Ofgem-style day rate</span></label>
               <label>Public charging (p/kWh)<input class="volatile" type="number" id="ss_publicRate" min="0" step="0.1" value="55"></label>
               <label>Extra household cost from EV tariff (£/yr)<input class="volatile" type="number" id="ss_tariffExtra" min="0" step="10" value="0"><span class="tip">Standing charge / higher day rates on house use</span></label>
+              <label class="check span2" style="flex-direction:row;margin-top:8px"><input type="checkbox" id="ss_roadCharge"> Include EV road charge (~3p/mile)</label>
+              <label id="ss_roadRateWrap" hidden>Road charge rate (p/mile)<input type="number" id="ss_roadPPerMile" min="0" step="0.1" value="3"><span class="tip">Modelling toggle — not current law</span></label>
             </div>
           </div>
           <div class="section">
@@ -132,6 +134,7 @@
             <div class="metric"><div class="k">Charging + tariff extra / mo</div><div class="v" id="ss_charge">£0</div></div>
             <div class="metric"><div class="k">Petrol fuel / mo</div><div class="v" id="ss_fuel">£0</div></div>
             <div class="metric"><div class="k">Fuel saving only / mo</div><div class="v" id="ss_fuelSave">£0</div></div>
+            <div class="metric"><div class="k">EV road charge / mo</div><div class="v" id="ss_roadMo">£0</div></div>
           </div>
           <div class="explainer" id="ss_explainer"></div>
         </div>
@@ -153,8 +156,10 @@
               <label>ICE MPG<input class="volatile" type="number" id="own_mpg" min="1" step="0.1" value="40"></label>
               <label>Petrol (£/litre)<input class="volatile" type="number" id="own_petrol" min="0" step="0.01" value="1.68"></label>
               <label>EV efficiency (mi/kWh)<input class="volatile" type="number" id="own_mpkwh" min="0.1" step="0.1" value="4.0"></label>
-              <label>% charged at home<input type="number" id="own_homePct" min="0" max="100" value="80"></label>
+              <label>% charged at home<input type="number" id="own_homePct" min="0" max="100" value="80"><span class="tip">0 = public charging only</span></label>
               <label>% of home charging overnight<input type="number" id="own_nightPct" min="0" max="100" value="90"></label>
+              <label class="check span2" style="flex-direction:row;margin-top:8px"><input type="checkbox" id="own_publicOnly"> Public charging only (sets home % and charger to 0)</label>
+              <p class="tip span2" id="own_publicNote" hidden style="margin:0;color:var(--warn)">Home charger ignored while home charging is 0%.</p>
               <label>Night electricity (p/kWh)<input class="volatile" type="number" id="own_nightRate" min="0" step="0.01" value="8.00"></label>
               <label>Day electricity (p/kWh)<input class="volatile" type="number" id="own_dayRate" min="0" step="0.01" value="26.32"></label>
               <label>Public charging (p/kWh)<input class="volatile" type="number" id="own_publicRate" min="0" step="0.1" value="55"></label>
@@ -169,7 +174,8 @@
                 <span class="tip" id="own_iceTip" hidden>Estimate — replace with your figures</span>
               </label>
               <label>ICE market value today (£)<input class="volatile" type="number" id="own_iceValue" min="0" step="100" value="8000"><span class="tip">Example — edit to your trade-in/sale price</span></label>
-              <label>ICE finance still owed (£)<input type="number" id="own_iceFinance" min="0" step="100" value="0"></label>
+              <label class="check span2" style="flex-direction:row;margin-top:4px"><input type="checkbox" id="own_iceOutright" checked> ICE owned outright (no finance)</label>
+              <label id="own_iceFinanceWrap">ICE finance still owed (£)<input type="number" id="own_iceFinance" min="0" step="100" value="0"><span class="tip">Shown only when ICE is still on finance</span></label>
               <label>Expected ICE value at end (£)<input type="number" id="own_iceResidual" min="0" step="100" value=""><span class="tip">Blank = auto ~12%/yr</span></label>
               <label>Insurance (£/yr)<input type="number" id="own_iceIns" min="0" step="10" value="840"></label>
               <label>VED (£/yr)<input type="number" id="own_iceVed" min="0" step="10" value="200"></label>
@@ -181,17 +187,21 @@
           <div class="section">
             <h2>Buy EV</h2>
             <div class="fields">
-              <label class="span2">EV you're considering (optional)
+              <label class="span2">EV you are considering (optional)
                 <select id="own_evModel"><option value="">Custom / enter your own</option></select>
                 <span class="tip" id="own_evTip" hidden>Estimate — replace with your quote</span>
               </label>
-              <label>EV on-the-road price (£)<input class="volatile" type="number" id="own_evOtr" min="0" step="100" value="28000"><span class="tip">Example — edit to the EV you're looking at</span></label>
+              <label>EV on-the-road price (£)<input class="volatile" type="number" id="own_evOtr" min="0" step="100" value="28000"><span class="tip">Example — edit to the EV you are looking at</span></label>
               <label>Trade-in / sale credit (£)<input type="number" id="own_tradeIn" min="0" step="100" value=""><span class="tip">Blank = ICE market value</span></label>
               <label>Extra cash deposit (£)<input type="number" id="own_cashDeposit" min="0" step="100" value="0"></label>
-              <label>Home charger install (£)<input type="number" id="own_charger" min="0" step="50" value="0"><span class="tip">~£800 if you need a wallbox</span></label>
+              <label id="own_chargerWrap">Home charger install (£)<input type="number" id="own_charger" min="0" step="50" value="0"><span class="tip">Optional — leave 0 if public charging only / no wallbox (~£800 if needed)</span></label>
               <label>Grant / discount (£)<input type="number" id="own_grant" min="0" step="100" value="0"></label>
-              <label>Finance APR %<input type="number" id="own_apr" min="0" step="0.1" value="8.9"></label>
-              <label>Finance term (months)<input type="number" id="own_term" min="1" step="1" value="48"></label>
+              <label class="check span2" style="flex-direction:row;margin-top:4px"><input type="checkbox" id="own_evOutright" checked> EV bought outright (cash / no finance)</label>
+              <span class="tip span2">Example default: both bought/owned outright (cash). Untick EV cash to show APR/term and model HP finance. Cash path = day-0 pays remaining OTR after trade-in/deposit/grant.</span>
+              <label id="own_aprWrap">Finance APR %<input type="number" id="own_apr" min="0" step="0.1" value="8.9"></label>
+              <label id="own_termWrap">Finance term (months)<input type="number" id="own_term" min="1" step="1" value="48"></label>
+              <label class="check span2" style="flex-direction:row;margin-top:8px"><input type="checkbox" id="own_roadCharge"> Include EV road charge (~3p/mile)</label>
+              <label id="own_roadRateWrap" hidden>Road charge rate (p/mile)<input type="number" id="own_roadPPerMile" min="0" step="0.1" value="3"><span class="tip">Proposed/possible UK EV mileage charge — toggle if you want it in the model</span></label>
               <label>Expected EV residual at end (£)<input type="number" id="own_evResidual" min="0" step="100" value=""><span class="tip">Blank = auto ~15%/yr</span></label>
               <label>Insurance (£/yr)<input class="volatile" type="number" id="own_evIns" min="0" step="10" value="900"><span class="tip">Edit to your quote</span></label>
               <label>VED year 1 (£)<input type="number" id="own_evVed1" min="0" step="1" value="10"></label>
@@ -213,6 +223,8 @@
             <div class="metric"><div class="k">£/mo each (ICE / EV)</div><div class="v" id="own_pm">—</div></div>
             <div class="metric"><div class="k">ICE fuel total</div><div class="v" id="own_iceFuel">—</div></div>
             <div class="metric"><div class="k">EV charging + tariff extra</div><div class="v" id="own_evCharge">—</div></div>
+            <div class="metric"><div class="k">EV road charge total</div><div class="v" id="own_roadTot">—</div></div>
+            <div class="metric"><div class="k">Day-0 EV cash outlay</div><div class="v" id="own_day0">—</div></div>
           </div>
           <div class="explainer" id="own_explainer">Example scenario: sell/trade an £8k petrol car and buy a £28k EV, 8,000 miles/yr, mostly home overnight charging. Use the model dropdowns for ballpark estimates, or Reset to example. Change any field — especially price, insurance and residuals.</div>
         </div>
@@ -220,7 +232,7 @@
     </div>
 
     <footer>
-      <p><strong>Assumptions:</strong> Salary-sacrifice BiK 4% pure EV (2026/27). Ownership mode uses simple HP-style finance and straight depreciation if residuals are blank (ICE ~12%/yr, EV ~15%/yr). VED/ECS simplified. Extra household EV-tariff cost is user-entered (standing charge / higher day rates). Model prices and running costs in the dropdowns are static Sep-2026-style ballpark estimates, not live quotes — always override with your own figures. Estimates only — not financial advice. Schemes and quotes vary.</p>
+      <p><strong>Assumptions:</strong> Salary-sacrifice BiK 4% pure EV (2026/27). Ownership mode uses simple HP-style finance and straight depreciation if residuals are blank (ICE ~12%/yr, EV ~15%/yr). VED/ECS simplified. Extra household EV-tariff cost is user-entered (standing charge / higher day rates). Optional ~3p/mile EV road charge is a modelling toggle only (not current UK law — include if you want a possible future mileage levy in the numbers). Home charger is optional (leave 0 for public-only). Model prices and running costs in the dropdowns are static Sep-2026-style ballpark estimates, not live quotes — always override with your own figures. Estimates only — not financial advice. Schemes and quotes vary.</p>
       <p>Sources: <a href="https://www.gov.uk/guidance/company-car-benefit-the-appropriate-percentage-480-appendix-2" target="_blank" rel="noopener">GOV.UK BiK</a> · <a href="https://www.ofgem.gov.uk/information-consumers/energy-advice-households/energy-price-cap-unit-rates-and-standing-charges" target="_blank" rel="noopener">Ofgem price cap</a></p>
     </footer>
   </div>
@@ -358,6 +370,47 @@
     setVal('own_evService', c.serviceYr);
     calcOwn();
   }
+  function checked(id){const el=document.getElementById(id); return !!(el && el.checked)}
+  function setChecked(id, on){const el=document.getElementById(id); if(el) el.checked=!!on}
+  function showEl(id, on){const el=document.getElementById(id); if(el) el.hidden=!on}
+  function setDisabled(id, on){const el=document.getElementById(id); if(el) el.disabled=!!on}
+
+  function syncOwnDisclosure(){
+    const iceOut=checked('own_iceOutright');
+    const evOut=checked('own_evOutright');
+    const pub=checked('own_publicOnly');
+    const road=checked('own_roadCharge');
+    showEl('own_iceFinanceWrap', !iceOut);
+    showEl('own_aprWrap', !evOut);
+    showEl('own_termWrap', !evOut);
+    showEl('own_chargerWrap', !pub);
+    showEl('own_roadRateWrap', road);
+    const homePct=num('own_homePct');
+    const note=document.getElementById('own_publicNote');
+    if(note) note.hidden=!(homePct<=0 || pub);
+  }
+
+  function syncSsDisclosure(){
+    const road=checked('ss_roadCharge');
+    showEl('ss_roadRateWrap', road);
+  }
+
+  function onOwnPublicOnlyChange(){
+    if(checked('own_publicOnly')){
+      setVal('own_homePct', 0);
+      setVal('own_charger', 0);
+    }
+    syncOwnDisclosure();
+    calcOwn();
+  }
+
+  function onOwnHomePctChange(){
+    if(num('own_homePct')>0 && checked('own_publicOnly')){
+      setChecked('own_publicOnly', false);
+    }
+    syncOwnDisclosure();
+  }
+
   function resetOwnExample(){
     document.getElementById('own_iceModel').value='';
     document.getElementById('own_evModel').value='';
@@ -374,7 +427,9 @@
     setVal('own_dayRate', 26.32);
     setVal('own_publicRate', 55);
     setVal('own_tariffExtra', 0);
+    setChecked('own_publicOnly', false);
     setVal('own_iceValue', 8000);
+    setChecked('own_iceOutright', true);
     setVal('own_iceFinance', 0);
     setVal('own_iceResidual', '');
     setVal('own_iceIns', 840);
@@ -387,8 +442,11 @@
     setVal('own_cashDeposit', 0);
     setVal('own_charger', 0);
     setVal('own_grant', 0);
+    setChecked('own_evOutright', true);
     setVal('own_apr', 8.9);
     setVal('own_term', 48);
+    setChecked('own_roadCharge', false);
+    setVal('own_roadPPerMile', 3);
     setVal('own_evResidual', '');
     setVal('own_evIns', 900);
     setVal('own_evVed1', 10);
@@ -397,10 +455,12 @@
     setVal('own_evService', 180);
     setVal('own_evTyres', 180);
     setVal('own_evBreakdown', 90);
+    syncOwnDisclosure();
     calcOwn();
   }
 
   function calcSS(){
+    syncSsDisclosure();
     const salary=num('ss_salary'), region=document.getElementById('ss_region').value;
     const sacM=num('ss_sacrifice'), sacY=sacM*12, p11d=num('ss_p11d');
     const after=Math.max(0,salary-sacY);
@@ -408,9 +468,10 @@
     const bikY=p11d*0.04*mrate(after,region);
     const net=(sacY-saved+bikY)/12;
     const charge=chargeMo(num('ss_miles'),num('ss_mpkwh'),num('ss_homePct'),num('ss_nightPct'),num('ss_nightRate'),num('ss_dayRate'),num('ss_publicRate'),num('ss_tariffExtra'));
+    const roadMo=checked('ss_roadCharge') ? (num('ss_miles')*(num('ss_roadPPerMile')/100))/12 : 0;
     const fuel=((num('ss_miles')/Math.max(0.1,num('ss_mpg')))*4.54609*num('ss_petrol'))/12;
     const extras=num('ss_petrolIns')+num('ss_petrolVed')/12+num('ss_petrolService')/12+num('ss_petrolTyres')/12+num('ss_petrolBreakdown')/12+num('ss_petrolDeposit')/Math.max(1,num('ss_petrolTerm'));
-    const ev=net+charge, petrol=num('ss_petrolLease')+fuel+extras, save=petrol-ev;
+    const ev=net+charge+roadMo, petrol=num('ss_petrolLease')+fuel+extras, save=petrol-ev;
     const hero=document.getElementById('ss_hero');
     if(save>=0){hero.classList.remove('bad');document.getElementById('ss_heroLabel').textContent='Estimated EV salary-sacrifice saving';document.getElementById('ss_heroBig').textContent=fmt(save)+'/mo';}
     else{hero.classList.add('bad');document.getElementById('ss_heroLabel').textContent='Estimated EV salary-sacrifice extra cost';document.getElementById('ss_heroBig').textContent=fmt(Math.abs(save))+'/mo';}
@@ -420,24 +481,32 @@
     document.getElementById('ss_charge').textContent=fmt2(charge);
     document.getElementById('ss_fuel').textContent=fmt2(fuel);
     document.getElementById('ss_fuelSave').textContent=fmt2(fuel-charge+num('ss_tariffExtra')/12);
-    document.getElementById('ss_explainer').innerHTML='<strong>How this works.</strong> EV all-in = net sacrifice after tax/NI/BiK + charging (day/night mix) + any extra household EV-tariff cost. Petrol all-in = lease + fuel + insurance/tax/service/tyres/breakdown/deposit spread. Optional model dropdowns fill ballpark estimates — edit yellow fields.';
+    const ssRoadEl=document.getElementById('ss_roadMo');
+    if(ssRoadEl) ssRoadEl.textContent=fmt2(roadMo);
+    document.getElementById('ss_explainer').innerHTML='<strong>How this works.</strong> EV all-in = net sacrifice after tax/NI/BiK + charging (day/night mix) + any extra household EV-tariff cost'+(roadMo>0?' + optional EV road charge':'')+'. Petrol all-in = lease + fuel + insurance/tax/service/tyres/breakdown/deposit spread. Optional model dropdowns fill ballpark estimates — edit yellow fields.';
   }
 
   function calcOwn(){
+    syncOwnDisclosure();
     const need=!(has('own_iceValue')&&has('own_evOtr'));
     document.getElementById('own_need').style.display=need?'block':'none';
     const years=num('own_years'), months=years*12;
     const miles=num('own_miles');
     const fuelMo=((miles/Math.max(0.1,num('own_mpg')))*4.54609*num('own_petrol'))/12;
-    const chargeMoVal=chargeMo(miles,num('own_mpkwh'),num('own_homePct'),num('own_nightPct'),num('own_nightRate'),num('own_dayRate'),num('own_publicRate'),num('own_tariffExtra'));
+    const homePct=num('own_homePct');
+    const chargeMoVal=chargeMo(miles,num('own_mpkwh'),homePct,num('own_nightPct'),num('own_nightRate'),num('own_dayRate'),num('own_publicRate'),num('own_tariffExtra'));
+    const blank=['own_iceNet','own_evNet','own_be','own_pm','own_iceFuel','own_evCharge','own_roadTot','own_day0'];
     if(need){
       document.getElementById('own_hero').classList.remove('bad');
       document.getElementById('own_heroLabel').textContent='Enter ICE value and EV price';
-      document.getElementById('own_heroBig').textContent='—';
-      ['own_iceNet','own_evNet','own_be','own_pm','own_iceFuel','own_evCharge'].forEach(id=>document.getElementById(id).textContent='—');
+      document.getElementById('own_heroBig').textContent='\u2014';
+      blank.forEach(id=>{const el=document.getElementById(id); if(el) el.textContent='\u2014';});
       return;
     }
-    const iceVal=num('own_iceValue'), iceFin=num('own_iceFinance');
+    const iceOut=checked('own_iceOutright');
+    const evOut=checked('own_evOutright');
+    const iceVal=num('own_iceValue');
+    const iceFin=iceOut?0:num('own_iceFinance');
     const iceRes=has('own_iceResidual')?num('own_iceResidual'):iceVal*Math.pow(1-0.12,years);
     const iceRunYr=num('own_iceIns')+num('own_iceVed')+num('own_iceService')+num('own_iceTyres')+num('own_iceOther');
     const iceFuelTot=fuelMo*months, iceRunTot=iceRunYr*years;
@@ -446,15 +515,27 @@
     const evOtr=num('own_evOtr');
     const trade=has('own_tradeIn')?num('own_tradeIn'):iceVal;
     const equity=Math.max(0,trade-iceFin);
-    const financed=Math.max(0, evOtr - equity - num('own_cashDeposit') - num('own_grant'));
-    const term=Math.max(1,num('own_term'));
-    const apr=num('own_apr');
-    const monthlyFin=pmt(apr,term,financed);
-    const payMonths=Math.min(months,term);
-    const financePaid=monthlyFin*payMonths;
-    const balEnd=remainingPrincipal(apr,term,financed,payMonths);
+    const grant=num('own_grant');
+    const cashDep=num('own_cashDeposit');
+    const chargerEff=(homePct<=0 || checked('own_publicOnly'))?0:num('own_charger');
     const shortfall=Math.max(0, iceFin-trade);
-    const day0=shortfall + num('own_cashDeposit') + num('own_charger') - num('own_grant');
+
+    let financed, term, apr, monthlyFin, payMonths, financePaid, balEnd, day0;
+    if(evOut){
+      financed=0; term=1; apr=0; monthlyFin=0; payMonths=0; financePaid=0; balEnd=0;
+      // Cash: day-0 = ICE shortfall + remaining OTR after equity/trade-in/grant + charger
+      day0=shortfall + Math.max(0, evOtr - equity - grant) + chargerEff;
+    } else {
+      financed=Math.max(0, evOtr - equity - cashDep - grant);
+      term=Math.max(1,num('own_term'));
+      apr=num('own_apr');
+      monthlyFin=pmt(apr,term,financed);
+      payMonths=Math.min(months,term);
+      financePaid=monthlyFin*payMonths;
+      balEnd=remainingPrincipal(apr,term,financed,payMonths);
+      day0=shortfall + cashDep + chargerEff - grant;
+    }
+
     const evRes=has('own_evResidual')?num('own_evResidual'):evOtr*Math.pow(1-0.15,years);
     let evVedTot=0;
     for(let y=1;y<=years;y++){
@@ -463,7 +544,9 @@
     }
     const evRunTot=(num('own_evIns')+num('own_evService')+num('own_evTyres')+num('own_evBreakdown'))*years + evVedTot;
     const evChargeTot=chargeMoVal*months;
-    const evNetPos=day0 + financePaid + evRunTot + evChargeTot - Math.max(0, evRes - balEnd);
+    const roadTot=checked('own_roadCharge') ? miles*(num('own_roadPPerMile')/100)*years : 0;
+    const roadMo=roadTot/months;
+    const evNetPos=day0 + financePaid + evRunTot + evChargeTot + roadTot - Math.max(0, evRes - balEnd);
 
     const adv=iceNetPos - evNetPos;
     const hero=document.getElementById('own_hero');
@@ -475,6 +558,8 @@
     document.getElementById('own_pm').textContent=fmt(iceNetPos/months)+' / '+fmt(evNetPos/months);
     document.getElementById('own_iceFuel').textContent=fmt2(iceFuelTot);
     document.getElementById('own_evCharge').textContent=fmt2(evChargeTot);
+    document.getElementById('own_roadTot').textContent=fmt2(roadTot);
+    document.getElementById('own_day0').textContent=fmt2(day0);
 
     let iceCum=0, evCum=day0;
     let bal=financed; const r=(apr/100)/12; const pay=monthlyFin;
@@ -486,13 +571,14 @@
         bal = bal*(1+r)-pay; if(bal<0) bal=0;
         evCum += pay;
       }
-      evCum += (evRunTot/months)+chargeMoVal;
+      evCum += (evRunTot/months)+chargeMoVal+roadMo;
       let icePos=iceCum; let evPos=evCum;
       if(m===months){ icePos -= Math.max(0,iceRes); evPos -= Math.max(0,evRes-bal); }
       if(evPos<=icePos){ be='Month '+m; break; }
     }
     document.getElementById('own_be').textContent=be;
-    document.getElementById('own_explainer').innerHTML='<strong>How this works.</strong> Example scenario starts at £8k ICE vs £28k EV over 5 years (Reset to example). Keep-ICE net ≈ running + fuel + clearing remaining finance − residual. Buy-EV net ≈ day-0 cash (shortfall/deposit/charger) + finance paid + running + charging/tariff extra − (residual − HP left). Model dropdowns fill static estimates you can override. Trade-in defaults to ICE market value.';
+    const pathTip=evOut?'EV cash purchase (no HP). ':'EV on finance. ';
+    document.getElementById('own_explainer').innerHTML='<strong>How this works.</strong> Example: £8k ICE vs £28k EV over 5 years (Reset to example). '+pathTip+'Keep-ICE net ≈ running + fuel'+(iceFin>0?' + clearing remaining finance':'')+' − residual. Buy-EV net ≈ day-0 cash + '+(evOut?'cash purchase remaining':'finance paid')+' + running + charging/tariff extra'+(roadTot>0?' + optional road charge':'')+' − residual'+(evOut?'':'. Residual is reduced by any HP balance left')+'. Home charger is optional (hidden when public-only). Trade-in defaults to ICE market value.';
   }
 
   function bind(formId, fn){const f=document.getElementById(formId); f.addEventListener('input',fn); f.addEventListener('change',fn);}
@@ -505,6 +591,12 @@
   document.getElementById('own_iceModel').addEventListener('change', applyOwnIce);
   document.getElementById('own_evModel').addEventListener('change', applyOwnEv);
   document.getElementById('own_resetExample').addEventListener('click', resetOwnExample);
+  document.getElementById('own_publicOnly').addEventListener('change', onOwnPublicOnlyChange);
+  document.getElementById('own_homePct').addEventListener('input', onOwnHomePctChange);
+  document.getElementById('own_iceOutright').addEventListener('change', ()=>{syncOwnDisclosure(); calcOwn();});
+  document.getElementById('own_evOutright').addEventListener('change', ()=>{syncOwnDisclosure(); calcOwn();});
+  document.getElementById('own_roadCharge').addEventListener('change', ()=>{syncOwnDisclosure(); calcOwn();});
+  document.getElementById('ss_roadCharge').addEventListener('change', ()=>{syncSsDisclosure(); calcSS();});
   bind('form-ss', calcSS); bind('form-own', calcOwn);
   document.querySelectorAll('.tab').forEach(btn=>{
     btn.addEventListener('click',()=>{
@@ -514,6 +606,7 @@
       document.getElementById('mode-'+btn.dataset.mode).classList.add('active');
     });
   });
+  syncOwnDisclosure(); syncSsDisclosure();
   calcSS(); calcOwn();
   </script>
 </body>
